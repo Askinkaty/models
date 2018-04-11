@@ -98,11 +98,11 @@ tf.app.flags.DEFINE_integer('max_steps', 1000000,
 tf.app.flags.DEFINE_string(
     'mask_strategy', 'random', 'Strategy for masking the words.  Determine the '
     'characterisitics of how the words are dropped out.  One of '
-    "['contiguous', 'random'].")
+    "['contiguous', 'random'].") #??? how contiguous 
 tf.app.flags.DEFINE_float('is_present_rate', 0.5,
                           'Percent of tokens present in the forward sequence.')
 tf.app.flags.DEFINE_float('is_present_rate_decay', None, 'Decay rate for the '
-                          'percent of words that are real (are present).')
+                          'percent of words that are real (are present).')  #???
 tf.app.flags.DEFINE_string(
     'generator_model', 'seq2seq',
     "Type of Generator model.  One of ['rnn', 'seq2seq', 'seq2seq_zaremba',"
@@ -246,6 +246,7 @@ def create_MaskGAN(hparams, is_training):
     model:  Namedtuple for specifying the MaskGAN.
   """
   global_step = tf.Variable(0, name='global_step', trainable=False)
+  print('global_step', global_step)
 
   new_learning_rate = tf.placeholder(tf.float32, [], name='new_learning_rate')
   learning_rate = tf.Variable(0.0, name='learning_rate', trainable=False)

@@ -83,7 +83,7 @@ def ptb_raw_data(data_path=None):
 def ptb_iterator(raw_data, batch_size, num_steps, epoch_size_override=None):
   """Iterate on the raw PTB data.
 
-  This generates batch_size pointers into the raw PTB data, and allows
+  This generates batch_size pointers into the raw PTB data, gand allows
   minibatch iteration along these pointers.
 
   Args:
