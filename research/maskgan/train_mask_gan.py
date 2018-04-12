@@ -57,6 +57,7 @@ from model_utils import helper
 from model_utils import model_construction
 from model_utils import model_losses
 from model_utils import model_optimization
+from losses import losses
 
 # Data.
 from model_utils import model_utils
@@ -98,11 +99,11 @@ tf.app.flags.DEFINE_integer('max_steps', 1000000,
 tf.app.flags.DEFINE_string(
     'mask_strategy', 'random', 'Strategy for masking the words.  Determine the '
     'characterisitics of how the words are dropped out.  One of '
-    "['contiguous', 'random'].") #??? how contiguous 
+    "['contiguous', 'random'].")
 tf.app.flags.DEFINE_float('is_present_rate', 0.5,
                           'Percent of tokens present in the forward sequence.')
 tf.app.flags.DEFINE_float('is_present_rate_decay', None, 'Decay rate for the '
-                          'percent of words that are real (are present).')  #???
+                          'percent of words that are real (are present).')
 tf.app.flags.DEFINE_string(
     'generator_model', 'seq2seq',
     "Type of Generator model.  One of ['rnn', 'seq2seq', 'seq2seq_zaremba',"
@@ -227,7 +228,8 @@ def create_hparams():
       gen_nas_keep_prob_0=0.85,
       gen_nas_keep_prob_1=0.55,
       dis_nas_keep_prob_0=0.85,
-      dis_nas_keep_prob_1=0.55)
+      dis_nas_keep_prob_1=0.55,
+	  gen_pretrain_learning_rate = 5e-4)
   # Command line flags override any of the preceding hyperparameter values.
   if FLAGS.hparams:
     hparams = hparams.parse(FLAGS.hparams)
@@ -246,7 +248,6 @@ def create_MaskGAN(hparams, is_training):
     model:  Namedtuple for specifying the MaskGAN.
   """
   global_step = tf.Variable(0, name='global_step', trainable=False)
-  print('global_step', global_step)
 
   new_learning_rate = tf.placeholder(tf.float32, [], name='new_learning_rate')
   learning_rate = tf.Variable(0.0, name='learning_rate', trainable=False)
@@ -337,7 +338,7 @@ def create_MaskGAN(hparams, is_training):
   if FLAGS.gen_pretrain_steps:
     #raise NotImplementedError
     # # TODO(liamfedus): Rewrite this.
-    fwd_cross_entropy_loss = tf.reduce_mean(fwd_cross_entropy_losses)
+    fwd_cross_entropy_loss = tf.reduce_mean(fake_cross_entropy_losses)
     gen_pretrain_op = model_optimization.create_gen_pretrain_op(
       hparams, fwd_cross_entropy_loss, global_step)
   else:
@@ -559,14 +560,14 @@ def train_model(hparams, data, log_dir, log, id_to_word, data_ngram_counts):
 
           ## Pretrain the generator.
           if FLAGS.gen_pretrain_steps:
-            pretrain_mask_gan.pretrain_generator(sv, sess, model, data, log,
-                                                 id_to_word, data_ngram_counts,
-                                                 is_chief)
+            pretrain_mask_gan.pretrain_generator(sv=sv, sess=sess, model=model, data=data, log=tf.gfile.GFile(os.path.join(FLAGS.base_directory, 'train-log.txt'), mode='w'),
+                                                 id_to_word=id_to_word, data_ngram_counts=2,
+                                                 is_chief=True)
 
           ## Pretrain the discriminator.
           if FLAGS.dis_pretrain_steps:
             pretrain_mask_gan.pretrain_discriminator(
-                sv, sess, model, data, log, id_to_word, data_ngram_counts,
+                model, data, log, id_to_word, data_ngram_counts,
                 is_chief)
 
           # Initial indicators for printing and summarizing.
@@ -754,6 +755,9 @@ def train_model(hparams, data, log_dir, log, id_to_word, data_ngram_counts):
 
                 # Summary:  n-gram
                 avg_percent_captured = {'2': 0., '3': 0., '4': 0.}
+
+                #print('NGRAM COUNTS', data_ngram_counts)
+                
                 for n, data_ngram_count in data_ngram_counts.items():
                   batch_percent_captured = evaluation_utils.sequence_ngram_evaluation(
                       sess, model.fake_sequence, log, train_feed,
@@ -838,7 +842,7 @@ def train_model(hparams, data, log_dir, log, id_to_word, data_ngram_counts):
   log.close()
 
 
-def evaluate_once(data, sv, model, sess, train_dir, log, id_to_word,
+def evaluate_once(data, sv, model, train_dir, log, id_to_word,
                   data_ngram_counts, eval_saver):
   """Evaluate model for a number of steps.
 
@@ -895,7 +899,7 @@ def evaluate_once(data, sv, model, sess, train_dir, log, id_to_word,
       is_present_rate = FLAGS.is_present_rate
       tf.logging.info('Evaluating on is_present_rate=%.3f.' % is_present_rate)
 
-    model_utils.assign_percent_real(sess, model.percent_real_update,
+    model_utils.assign_percent_real(sv, sess, model.percent_real_update,
                                     model.new_rate, is_present_rate)
 
     # Randomly mask out tokens.
@@ -1104,6 +1108,8 @@ def main(_):
     word_to_id = imdb_loader.build_vocab(
         os.path.join(FLAGS.data_dir, 'vocab.txt'))
   id_to_word = {v: k for k, v in word_to_id.items()}
+  print('HULLO')
+  print(word_to_id)
 
   # Dictionary of Training Set n-gram counts.
   bigram_tuples = n_gram.find_all_ngrams(valid_data_flat, n=2)
@@ -1123,6 +1129,7 @@ def main(_):
       '4': fourgram_counts
   }
 
+  
   # TODO(liamfedus):  This was necessary because there was a problem with our
   # originally trained IMDB models.  The EOS_INDEX was off by one, which means,
   # two words were mapping to index 86933.  The presence of '</s>' is going
@@ -1146,7 +1153,8 @@ def main(_):
         os.path.join(FLAGS.base_directory, 'test-log.txt'), mode='w')
 
   if FLAGS.mode == MODE_TRAIN:
-    train_model(hparams, data_set, train_dir, log, id_to_word,
+    train_dir = './tmp/maskGAN/pretrained/'
+    train_model(hparams, raw_data[0], train_dir, log, id_to_word,
                 data_ngram_counts)
 
   elif FLAGS.mode == MODE_VALIDATION:

@@ -147,7 +147,7 @@ def create_dis_train_op(hparams, dis_loss, global_step):
     if FLAGS.dis_update_share_embedding and FLAGS.dis_share_embedding:
       shared_embedding = [
           v for v in tf.trainable_variables()
-          if v.op.name == 'gen/decoder/rnn/embedding'
+          if v.op.name == 'gen/decoder/rnn/softmax_b'
       ][0]
       dis_vars.append(shared_embedding)
     print('\nOptimizing Discriminator vars:')

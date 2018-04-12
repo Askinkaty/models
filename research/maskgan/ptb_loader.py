@@ -99,8 +99,8 @@ def ptb_iterator(raw_data, batch_size, num_steps, epoch_size_override=None):
   Raises:
     ValueError: if batch_size or num_steps are too high.
   """
+  #print(raw_data)
   raw_data = np.array(raw_data, dtype=np.int32)
-
   data_len = len(raw_data)
   batch_len = data_len // batch_size
   data = np.full([batch_size, batch_len], EOS_INDEX, dtype=np.int32)

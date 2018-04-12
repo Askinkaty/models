@@ -55,12 +55,15 @@ def pretrain_generator(sv, sess, model, data, log, id_to_word,
 
     costs = 0.
     iters = 0
+    #print(data)
+    
     if FLAGS.data_set == 'ptb':
       iterator = ptb_loader.ptb_iterator(data, FLAGS.batch_size,
                                          FLAGS.sequence_length,
                                          FLAGS.epoch_size_override)
     elif FLAGS.data_set == 'imdb':
       iterator = imdb_loader.imdb_iterator(data, FLAGS.batch_size,
+
                                            FLAGS.sequence_length)
 
     for x, y, _ in iterator:
