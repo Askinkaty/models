@@ -334,11 +334,11 @@ def create_MaskGAN(hparams, is_training):
 
   ## Pre-training.
   if FLAGS.gen_pretrain_steps:
-    #raise NotImplementedError
+    raise NotImplementedError
     # # TODO(liamfedus): Rewrite this.
-    fwd_cross_entropy_loss = tf.reduce_mean(fwd_cross_entropy_losses)
-    gen_pretrain_op = model_optimization.create_gen_pretrain_op(
-      hparams, fwd_cross_entropy_loss, global_step)
+    # fwd_cross_entropy_loss = tf.reduce_mean(fwd_cross_entropy_losses)
+    # gen_pretrain_op = model_optimization.create_gen_pretrain_op(
+    #     hparams, fwd_cross_entropy_loss, global_step)
   else:
     gen_pretrain_op = None
   if FLAGS.dis_pretrain_steps:
@@ -461,7 +461,7 @@ def compute_geometric_average(percent_captured):
   """Compute the geometric average of the n-gram metrics."""
 
   res = 1.
-  for _, n_gram_percent in percent_captured.items():
+  for _, n_gram_percent in percent_captured.iteritems():
     res *= n_gram_percent
 
   return np.power(res, 1. / float(len(percent_captured)))
@@ -472,7 +472,7 @@ def compute_arithmetic_average(percent_captured):
   N = len(percent_captured)
 
   res = 0.
-  for _, n_gram_percent in percent_captured.items():
+  for _, n_gram_percent in percent_captured.iteritems():
     res += n_gram_percent
 
   return res / float(N)
@@ -753,7 +753,7 @@ def train_model(hparams, data, log_dir, log, id_to_word, data_ngram_counts):
 
                 # Summary:  n-gram
                 avg_percent_captured = {'2': 0., '3': 0., '4': 0.}
-                for n, data_ngram_count in data_ngram_counts.items():
+                for n, data_ngram_count in data_ngram_counts.iteritems():
                   batch_percent_captured = evaluation_utils.sequence_ngram_evaluation(
                       sess, model.fake_sequence, log, train_feed,
                       data_ngram_count, int(n))
@@ -805,7 +805,7 @@ def train_model(hparams, data, log_dir, log, id_to_word, data_ngram_counts):
 
                 # Average percent captured for each of the n-grams.
                 avg_percent_captured = {'2': 0., '3': 0., '4': 0.}
-                for n, data_ngram_count in data_ngram_counts.items():
+                for n, data_ngram_count in data_ngram_counts.iteritems():
                   batch_percent_captured = evaluation_utils.sequence_ngram_evaluation(
                       sess, model.fake_sequence, log, train_feed,
                       data_ngram_count, int(n))
@@ -924,7 +924,7 @@ def evaluate_once(data, sv, model, sess, train_dir, log, id_to_word,
         ],
         feed_dict=eval_feed)
 
-    for n, data_ngram_count in data_ngram_counts.items():
+    for n, data_ngram_count in data_ngram_counts.iteritems():
       batch_percent_captured = evaluation_utils.sequence_ngram_evaluation(
           sess, model.fake_sequence, log, eval_feed, data_ngram_count, int(n))
       avg_percent_captured[n] += batch_percent_captured
@@ -938,7 +938,7 @@ def evaluate_once(data, sv, model, sess, train_dir, log, id_to_word,
 
   # Calulate rolling metrics.
   perplexity = np.exp(cumulative_costs / gen_iters)
-  for n, _ in avg_percent_captured.items():
+  for n, _ in avg_percent_captured.iteritems():
     avg_percent_captured[n] /= gen_iters
 
   # Confirm perplexity is not infinite.
@@ -953,7 +953,7 @@ def evaluate_once(data, sv, model, sess, train_dir, log, id_to_word,
   print(' perplexity: %.3f' % perplexity)
   log.write(' perplexity: %.3f\n' % perplexity)
 
-  for n, n_gram_percent in avg_percent_captured.items():
+  for n, n_gram_percent in avg_percent_captured.iteritems():
     n = int(n)
     print(' percent of %d-grams captured: %.3f.' % (n, n_gram_percent))
     log.write(' percent of %d-grams captured: %.3f.\n' % (n, n_gram_percent))
@@ -971,7 +971,7 @@ def evaluate_once(data, sv, model, sess, train_dir, log, id_to_word,
   sv.SummaryComputed(sess, summary_str, global_step=step)
 
   # Summary:  n-gram
-  for n, n_gram_percent in avg_percent_captured.items():
+  for n, n_gram_percent in avg_percent_captured.iteritems():
     n = int(n)
     summary_percent_str = tf.Summary(value=[
         tf.Summary.Value(
@@ -1102,7 +1102,7 @@ def main(_):
   elif FLAGS.data_set == 'imdb':
     word_to_id = imdb_loader.build_vocab(
         os.path.join(FLAGS.data_dir, 'vocab.txt'))
-  id_to_word = {v: k for k, v in word_to_id.items()}
+  id_to_word = {v: k for k, v in word_to_id.iteritems()}
 
   # Dictionary of Training Set n-gram counts.
   bigram_tuples = n_gram.find_all_ngrams(valid_data_flat, n=2)
