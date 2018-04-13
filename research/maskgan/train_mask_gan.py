@@ -53,6 +53,10 @@ import tensorflow as tf
 import pretrain_mask_gan
 from data import imdb_loader
 from data import ptb_loader
+from data import new_data_loader
+from data.vocab import Vocab 
+
+
 from model_utils import helper
 from model_utils import model_construction
 from model_utils import model_losses
@@ -490,6 +494,12 @@ def get_iterator(data):
     iterator = imdb_loader.imdb_iterator(data, FLAGS.batch_size,
                                          FLAGS.sequence_length)
   return iterator
+
+
+def get_new_iterator():
+  path = '/tmp/fin_data'
+  train_iterator = new_data_loader.read_instances(path, )
+
 
 
 def train_model(hparams, data, log_dir, log, id_to_word, data_ngram_counts):
