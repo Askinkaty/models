@@ -96,7 +96,7 @@ tf.app.flags.DEFINE_integer('ps_tasks', 0, """Number of tasks in the ps job.
 tf.app.flags.DEFINE_string(
     'hparams', '', 'Comma separated list of name=value hyperparameter pairs.')
 tf.app.flags.DEFINE_integer('batch_size', 20, 'The batch size.')
-tf.app.flags.DEFINE_integer('vocab_size', 10000, 'The vocabulary size.')
+tf.app.flags.DEFINE_integer('vocab_size', 1308957, 'The vocabulary size.')
 tf.app.flags.DEFINE_integer('sequence_length', 20, 'The sequence length.')
 tf.app.flags.DEFINE_integer('max_steps', 1000000,
                             'Maximum number of steps to run.')
@@ -147,7 +147,7 @@ tf.app.flags.DEFINE_float('advantage_clipping', 5., 'Clipping for advantages.')
 tf.app.flags.DEFINE_string(
     'baseline_method', None,
     "Approach for baseline.  One of ['critic', 'dis_batch', 'ema', None]")
-tf.app.flags.DEFINE_float('perplexity_threshold', 15000,
+tf.app.flags.DEFINE_float('perplexity_threshold', 300000,
                           'Limit for perplexity before terminating job.')
 tf.app.flags.DEFINE_float('zoneout_drop_prob', 0.1,
                           'Probability for dropping parameter for zoneout.')
@@ -182,7 +182,7 @@ tf.app.flags.DEFINE_string('base_directory', '/tmp/maskGAN_v0.00',
                            'Base directory for the logging, events and graph.')
 tf.app.flags.DEFINE_string('data_set', 'ptb', 'Data set to operate on.  One of'
                            "['ptb', 'imdb']")
-tf.app.flags.DEFINE_string('data_dir', '/tmp/data/ptb',
+tf.app.flags.DEFINE_string('data_dir', '/tmp/fin_data',
                            'Directory for the training data.')
 tf.app.flags.DEFINE_string(
     'language_model_ckpt_dir', None,
@@ -570,9 +570,7 @@ def train_model(hparams, data, log_dir, log, id_to_word, data_ngram_counts):
 
           ## Pretrain the generator.
           if FLAGS.gen_pretrain_steps:
-            pretrain_mask_gan.pretrain_generator(sv=sv, sess=sess, model=model, data=data, log=tf.gfile.GFile(os.path.join(FLAGS.base_directory, 'train-log.txt'), mode='w'),
-                                                 id_to_word=id_to_word, data_ngram_counts=2,
-                                                 is_chief=True)
+            pretrain_mask_gan.pretrain_generator(sv=sv, sess=sess, model=model, data=data, log=tf.gfile.GFile(os.path.join(FLAGS.base_directory, 'train-log.txt'), mode='w'), id_to_word=id_to_word, data_ngram_counts=data_ngram_counts, is_chief=True)
 
           ## Pretrain the discriminator.
           if FLAGS.dis_pretrain_steps:
@@ -751,6 +749,10 @@ def train_model(hparams, data, log_dir, log, id_to_word, data_ngram_counts):
                                summary_step_division):
                 summary_step_division = step / FLAGS.summaries_every
 
+                print('PERPL', perplexity)
+                print('THR', FLAGS.perplexity_threshold)
+                print(perplexity >= FLAGS.perplexity_threshold)
+                
                 # Confirm perplexity is not infinite.
                 if (not np.isfinite(perplexity) or
                     perplexity >= FLAGS.perplexity_threshold):
@@ -1113,13 +1115,13 @@ def main(_):
   # Dictionary and reverse dictionry.
   if FLAGS.data_set == 'ptb':
     word_to_id = ptb_loader.build_vocab(
-        os.path.join(FLAGS.data_dir, 'ptb.train.txt'))
+        os.path.join(FLAGS.data_dir, 'train_fin_small3.txt'))
   elif FLAGS.data_set == 'imdb':
     word_to_id = imdb_loader.build_vocab(
         os.path.join(FLAGS.data_dir, 'vocab.txt'))
   id_to_word = {v: k for k, v in word_to_id.items()}
-  print('HULLO')
-  print(word_to_id)
+  #print('HULLO')
+  #print(word_to_id)
 
   # Dictionary of Training Set n-gram counts.
   bigram_tuples = n_gram.find_all_ngrams(valid_data_flat, n=2)

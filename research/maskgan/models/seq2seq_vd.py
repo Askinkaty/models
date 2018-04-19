@@ -93,6 +93,7 @@ def gen_encoder(hparams, inputs, targets_present, is_training, reuse=None):
     with tf.variable_scope('decoder/rnn'):
       embedding = tf.get_variable('embedding',
                                   [FLAGS.vocab_size, hparams.gen_rnn_size])
+                                  #partitioner=tf.fixed_size_partitioner(10))
 
   with tf.variable_scope('encoder', reuse=reuse):
 
@@ -122,6 +123,10 @@ def gen_encoder(hparams, inputs, targets_present, is_training, reuse=None):
     masked_inputs = transform_input_with_is_missing_token(
         inputs, targets_present)
 
+    
+    print('REAL INP', real_inputs)
+    print('MASKED', masked_inputs)
+    
     with tf.variable_scope('rnn') as scope:
       hidden_states = []
 
@@ -130,6 +135,7 @@ def gen_encoder(hparams, inputs, targets_present, is_training, reuse=None):
       if not FLAGS.seq2seq_share_embedding:
         embedding = tf.get_variable('embedding',
                                     [FLAGS.vocab_size, hparams.gen_rnn_size])
+                                    #partitioner=tf.fixed_size_partitioner(10))
       missing_embedding = tf.get_variable('missing_embedding',
                                           [1, hparams.gen_rnn_size])
       embedding = tf.concat([embedding, missing_embedding], axis=0)
@@ -184,6 +190,7 @@ def gen_encoder_cnn(hparams, inputs, targets_present, is_training, reuse=None):
     with tf.variable_scope('rnn'):
       embedding = tf.get_variable('embedding',
                                   [FLAGS.vocab_size, hparams.gen_rnn_size])
+                                  #partitioner=tf.fixed_size_partitioner(10))
 
   cnn_inputs = tf.nn.embedding_lookup(embedding, sequence)
 
@@ -255,6 +262,7 @@ def gen_decoder(hparams,
     with tf.variable_scope('decoder/rnn', reuse=True):
       embedding = tf.get_variable('embedding',
                                   [FLAGS.vocab_size, hparams.gen_rnn_size])
+                                  #partitioner=tf.fixed_size_partitioner(10))
 
   with tf.variable_scope('decoder', reuse=reuse):
 
@@ -307,6 +315,7 @@ def gen_decoder(hparams,
       if not FLAGS.seq2seq_share_embedding:
         embedding = tf.get_variable('embedding',
                                     [FLAGS.vocab_size, hparams.gen_rnn_size])
+                                    #partitioner=tf.fixed_size_partitioner(10))
       softmax_w = tf.matrix_transpose(embedding)
       softmax_b = tf.get_variable('softmax_b', [FLAGS.vocab_size])
 
@@ -544,11 +553,13 @@ def discriminator(hparams,
     with tf.variable_scope('gen/decoder/rnn', reuse=True):
       embedding = tf.get_variable('embedding',
                                   [FLAGS.vocab_size, hparams.gen_rnn_size])
+                                  #partitioner=tf.fixed_size_partitioner(10))
   else:
     # Explicitly share the embedding.
     with tf.variable_scope('dis/decoder/rnn', reuse=reuse):
       embedding = tf.get_variable('embedding',
                                   [FLAGS.vocab_size, hparams.dis_rnn_size])
+                                  #partitioner=tf.fixed_size_partitioner(10))
 
   # Mask the input sequence.
   masked_inputs = transform_input_with_is_missing_token(inputs, targets_present)

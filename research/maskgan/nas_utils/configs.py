@@ -39,7 +39,7 @@ class AlienConfig2(object):
   keep_prob = [1 - 0.15, 1 - 0.45]
   lr_decay = 0.95
   batch_size = 20
-  vocab_size = 10000
+  vocab_size = 2516438
   weight_decay = 1e-4
   share_embeddings = True
   cell = "alien"
