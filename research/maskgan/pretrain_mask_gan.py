@@ -75,7 +75,7 @@ def pretrain_generator(sv, sess, model, data, log, id_to_word,
       # For pretraining with cross entropy loss, we have all tokens in the
       # forward sequence present (all True).
       model_utils.assign_percent_real(sess, model.percent_real_update,
-                                      model.new_rate, 1.0)
+                                      model.new_rate, 0.0)
       p = np.ones(shape=[FLAGS.batch_size, FLAGS.sequence_length], dtype=bool)
 
       pretrain_feed = {model.inputs: x, model.targets: y, model.present: p}
