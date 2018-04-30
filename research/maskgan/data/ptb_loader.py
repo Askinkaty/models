@@ -68,14 +68,14 @@ def ptb_raw_data(data_path=None):
     where each of the data objects can be passed to PTBIterator.
   """
 
-  train_path = os.path.join(data_path, "train_fin_small3.txt")
-  valid_path = os.path.join(data_path, "valid_fin_small3.txt")
-  test_path = os.path.join(data_path, "test_fin_small3.txt")
+  # train_path = os.path.join(data_path, "train_fin_small3.txt")
+  # valid_path = os.path.join(data_path, "valid_fin_small3.txt")
+  # test_path = os.path.join(data_path, "test_fin_small3.txt")
 
 
-  # train_path = os.path.join(data_path, "ptb.train.txt")
-  # valid_path = os.path.join(data_path, "ptb.valid.txt")
-  # test_path = os.path.join(data_path, "ptb.test.txt")
+  train_path = os.path.join(data_path, "ptb.train.txt")
+  valid_path = os.path.join(data_path, "ptb.valid.txt")
+  test_path = os.path.join(data_path, "ptb.test.txt")
   
   
   word_to_id = build_vocab(train_path)
