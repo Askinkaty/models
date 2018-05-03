@@ -207,7 +207,7 @@ def generate_logs(sess, model, log, id_to_word, feed):
                                       fake_cross_entropy_losses_eval)
 
   tuples_to_print = fake_tuples[:FLAGS.max_num_to_print]
-
+  #print_formatted(p, id_to_word, log, tuples_to_print)
   if FLAGS.print_verbose:
     print('fake_logits_eval')
     print(fake_logits_eval)

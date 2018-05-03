@@ -109,10 +109,10 @@ def ptb_iterator(raw_data, batch_size, num_steps, epoch_size_override=None):
   raw_data = np.array(raw_data, dtype=np.int32)
 
   data_len = len(raw_data)
-  print('DATA LEN', data_len)
+  #print('DATA LEN', data_len)
   batch_len = data_len // batch_size
-  print('BATCH LEN', batch_len)
-  print('BATCH SIZE', batch_size)
+  #print('BATCH LEN', batch_len)
+  #print('BATCH SIZE', batch_size)
   data = np.full([batch_size, batch_len], EOS_INDEX, dtype=np.int32)
   for i in range(batch_size):
     data[i] = raw_data[batch_len * i:batch_len * (i + 1)]
@@ -126,7 +126,7 @@ def ptb_iterator(raw_data, batch_size, num_steps, epoch_size_override=None):
     raise ValueError("epoch_size == 0, decrease batch_size or num_steps")
 
 
-  print('EPOCH SIZE', epoch_size)
+  #print('EPOCH SIZE', epoch_size)
   
   # print("Number of batches per epoch: %d" % epoch_size)
   for i in range(epoch_size):

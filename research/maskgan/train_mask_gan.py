@@ -96,9 +96,9 @@ tf.app.flags.DEFINE_integer('ps_tasks', 0, """Number of tasks in the ps job.
 ## General FLAGS.
 tf.app.flags.DEFINE_string(
     'hparams', '', 'Comma separated list of name=value hyperparameter pairs.')
-tf.app.flags.DEFINE_integer('batch_size', 3, 'The batch size.')
+tf.app.flags.DEFINE_integer('batch_size', 5, 'The batch size.')
 tf.app.flags.DEFINE_integer('vocab_size', 550, 'The vocabulary size.')
-tf.app.flags.DEFINE_integer('sequence_length', 10, 'The sequence length.')
+tf.app.flags.DEFINE_integer('sequence_length', 20, 'The sequence length.')
 tf.app.flags.DEFINE_integer('max_steps', 1000000,
                             'Maximum number of steps to run.')
 tf.app.flags.DEFINE_string(
@@ -179,7 +179,7 @@ tf.app.flags.DEFINE_integer('eval_epoch_size_override', None,
                             'Number of evaluation steps.')
 
 ## Directories and checkpoints.
-tf.app.flags.DEFINE_string('base_directory', '/tmp/maskGAN_v0.00',
+tf.app.flags.DEFINE_string('base_directory', '/tmp/maskGAN',
                            'Base directory for the logging, events and graph.')
 tf.app.flags.DEFINE_string('data_set', 'ptb', 'Data set to operate on.  One of'
                            "['ptb', 'imdb']")
@@ -215,8 +215,8 @@ def create_hparams():
   hparams = tf.contrib.training.HParams(
       gen_num_layers=2,
       dis_num_layers=2,
-      gen_rnn_size=650,
-      dis_rnn_size=650,
+      gen_rnn_size=400,
+      dis_rnn_size=400,
       gen_learning_rate=5e-4,
       dis_learning_rate=5e-3,
       critic_learning_rate=5e-3,
@@ -1125,9 +1125,7 @@ def main(_):
     word_to_id = imdb_loader.build_vocab(
         os.path.join(FLAGS.data_dir, 'vocab.txt'))
   id_to_word = {v: k for k, v in word_to_id.items()}
-  #print('HULLO')
-  #print(word_to_id)
-
+  
   # Dictionary of Training Set n-gram counts.
   bigram_tuples = n_gram.find_all_ngrams(valid_data_flat, n=2)
   trigram_tuples = n_gram.find_all_ngrams(valid_data_flat, n=3)
